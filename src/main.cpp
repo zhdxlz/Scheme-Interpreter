@@ -6,8 +6,9 @@
 #include <sstream>
 #include <iostream>
 #include <map>
-
-
+#ifndef ONLINE_JUDGE
+    #include<unistd.h>
+#endif
 extern std :: map<std :: string, ExprType> primitives;
 extern std :: map<std :: string, ExprType> reserved_words;
 
@@ -23,8 +24,11 @@ void REPL()
         Syntax stx = readSyntax(std :: cin); // read
         try
         {
+            stx->show(std::cout);
+            //std::cout<<std::endl;
+            //pause();
             Expr expr = stx -> parse(global_env); // parse
-            // stx -> show(std :: cout); // syntax print
+            //pause();
             Value val = expr -> eval(global_env);
             if (val -> v_type == V_TERMINATE)
                 break;
@@ -32,8 +36,11 @@ void REPL()
         }
         catch (const RuntimeError &RE)
         {
-            // std :: cout << RE.message();
-            std :: cout << "RuntimeError";
+            #ifndef ONLINE_JUDGE
+                std :: cout << RE.message();
+            #else
+                std :: cout << "RuntimeError";
+            #endif
         }
         puts("");
     }
