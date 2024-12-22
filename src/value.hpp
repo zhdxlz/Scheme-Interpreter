@@ -114,6 +114,14 @@ struct Primi : ValueBase
 };
 Value PrimiV(const ExprType &);
 
+struct Reser:ValueBase
+{
+    ExprType _e;
+    Reser(const ExprType&);
+    virtual void show(std::ostream &) override;
+};
+Value ReserV(const ExprType &);
+
 std::ostream &operator<<(std::ostream &, Value &);
 
 Assoc empty();

@@ -38,10 +38,12 @@ struct Lambda : ExprBase {
     virtual Value eval(Assoc &) override;
 };
 
+
 struct Apply : ExprBase {
     Expr rator;
     std::vector<Expr> rand;
-    Apply(const Expr &, const std :: vector<Expr> &);
+    std::vector<Syntax> syn;
+    Apply(const Expr &, const std :: vector<Expr> &,const std::vector<Syntax> &);
     virtual Value eval(Assoc &) override;
 }; // this is used to handle function calling, where rator is the operator and rands are operands
 
@@ -214,4 +216,8 @@ struct Cdr : Unary {
     virtual Value evalRator(const Value &) override;
 };
 
+struct Empt:ExprBase{
+    Empt();
+    virtual Value eval(Assoc &e) override;
+};
 #endif

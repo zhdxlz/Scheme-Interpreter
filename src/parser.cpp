@@ -40,8 +40,9 @@ Expr FalseSyntax :: parse(Assoc &env) {
 Expr List :: parse(Assoc &env) {
     //Empty List
     if (stxs.size()==0){
+        return Expr(new Empt());
         //Constructor pass the pointer to a Shared_ptr,and the whole obj "Expr" be returned with its value.
-        throw RuntimeError("Invalid Syntax.");
+        //throw RuntimeError("Invalid Syntax.(Syntax length 0)");
     }
     //vector<Expr> _v{};
     // for (int i=1;i<=stxs.size();i++){
@@ -50,82 +51,94 @@ Expr List :: parse(Assoc &env) {
     //return Expr(new Apply(stxs[1]->parse(env),_v));
     //Don't know how to process the function name before the evaluated.
     //Start with Text
-    if (dynamic_cast<Identifier*>(stxs[0].get())){
-        Identifier* pt=dynamic_cast<Identifier*>(stxs[0].get());
-        if (pt->s=="begin"){
-            vector<Expr> _t{};
-            for (int i=1;i<stxs.size();i++){
-                _t.push_back(stxs[i]->parse(env));
-            }
-            return Expr(new Begin(_t));
-        }
-        else if (pt->s=="quote"){
-            if (stxs.size()!=2) throw RuntimeError("Illegal quote.");
-            return Expr(new Quote(stxs[1]));
-        }
-        else if (pt->s=="if"){
-            if (stxs.size()!=4) throw RuntimeError("Illegal if comparison");
-            return Expr(new If(stxs[1]->parse(env),stxs[2]->parse(env),stxs[3]->parse(env)));
-        }
-        else if (pt->s=="let"){
-            if (stxs.size()!=3) throw RuntimeError("Illegal Let Size.");
-            if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal Let Definition(outside).");
-            List* _d=dynamic_cast<List*>(stxs[1].get());
-            std::vector<std::pair<std::string, Expr>> _v{};
-            //The variable assignments
-            for (int i=0;i<_d->stxs.size();i++){
-                if (!(dynamic_cast<List*>(_d->stxs[i].get()))) throw RuntimeError("Illegal Let Definition(inside).");
-                List* _t=dynamic_cast<List*>(_d->stxs[i].get());
-                if (_t->stxs.size()!=2) throw RuntimeError("Illegal Let Definition(syntax).");
-                Expr _ee=_t->stxs[1].get()->parse(env);
-                if (!dynamic_cast<Identifier*>(_t->stxs[0].get())) throw RuntimeError("Illegal Let definition(name)");
-                _v.push_back(std::make_pair(dynamic_cast<Identifier*>(_t->stxs[0].get())->s,_ee));
-            }
-            return Expr(new Let(_v,stxs[2].get()->parse(env)));
-        }
-        else if (pt->s=="lambda"){
-            if (stxs.size()!=3) throw RuntimeError("Illegal Lambda Size.");
-            if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal lambda");
-            List* _d=dynamic_cast<List*>(stxs[1].get());
-            std::vector<std::string> _v{};
-            for (int i=0;i<_d->stxs.size();i++){
-                if (!dynamic_cast<Identifier*>(_d->stxs[i].get())) throw RuntimeError("Illegal lambda");
-                Identifier* _i=dynamic_cast<Identifier*>(_d->stxs[i].get());
-                _v.push_back(_i->s);
-            }
-            return Expr(new Lambda(_v,stxs[2].get()->parse(env)));
-        }
-        else if (pt->s=="letrec"){
-            if (stxs.size()!=3) throw RuntimeError("Illegal Letrec Size.");
-            if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal Letrec Definition(outside).");
-            List* _d=dynamic_cast<List*>(stxs[1].get());
-            std::vector<std::pair<std::string, Expr>> _v{};
-            //The variable assignments
-            for (int i=0;i<_d->stxs.size();i++){
-                if (!(dynamic_cast<List*>(_d->stxs[i].get()))) throw RuntimeError("Illegal Letrec Definition(inside).");
-                List* _t=dynamic_cast<List*>(_d->stxs[i].get());
-                if (_t->stxs.size()!=2) throw RuntimeError("Illegal Letrec Definition(syntax).");
-                Expr _ee=_t->stxs[1].get()->parse(env);
-                if (!dynamic_cast<Identifier*>(_t->stxs[0].get())) throw RuntimeError("Illegal Letrec definition(name)");
-                _v.push_back(std::make_pair(dynamic_cast<Identifier*>(_t->stxs[0].get())->s,_ee));
-            }
-            return Expr(new Letrec(_v,stxs[2].get()->parse(env)));
-        }
-        else{
-            vector<Expr> _t{};
-            for (int i=1;i<stxs.size();i++){
-                _t.push_back(stxs[i]->parse(env));
-            }
-            return Expr(new Apply(stxs[0]->parse(env),_t));
-        }
+
+    //Only return Apply() Because we don't know the exactly meaning of the rand(maybe variables.)
+    //And judge them in evluation.cpp After eval the rands.
+    vector<Expr> _t{};
+    vector<Syntax> _s{};
+    for (int i=1;i<stxs.size();i++){
+        _t.push_back(stxs[i]->parse(env));
+        _s.push_back(stxs[i]);
     }
-    else{
-        vector<Expr> _t{};
-        for (int i=1;i<stxs.size();i++){
-            _t.push_back(stxs[i]->parse(env));
-        }
-        return Expr(new Apply(stxs[0]->parse(env),_t));
-    }
+    //Storage the origin syntax for quote use.
+    return Expr(new Apply(stxs[0]->parse(env),_t,_s));
+
+    // if (dynamic_cast<Identifier*>(stxs[0].get())){
+    //     Identifier* pt=dynamic_cast<Identifier*>(stxs[0].get());
+    //     if (pt->s=="begin"){
+    //         vector<Expr> _t{};
+    //         for (int i=1;i<stxs.size();i++){
+    //             _t.push_back(stxs[i]->parse(env));
+    //         }
+    //         return Expr(new Begin(_t));
+    //     }
+    //     else if (pt->s=="quote"){
+    //         if (stxs.size()!=2) throw RuntimeError("Illegal quote.");
+    //         return Expr(new Quote(stxs[1]));
+    //     }
+    //     else if (pt->s=="if"){
+    //         if (stxs.size()!=4) throw RuntimeError("Illegal if comparison");
+    //         return Expr(new If(stxs[1]->parse(env),stxs[2]->parse(env),stxs[3]->parse(env)));
+    //     }
+    //     else if (pt->s=="let"){
+    //         if (stxs.size()!=3) throw RuntimeError("Illegal Let Size.");
+    //         if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal Let Definition(outside).");
+    //         List* _d=dynamic_cast<List*>(stxs[1].get());
+    //         std::vector<std::pair<std::string, Expr>> _v{};
+    //         //The variable assignments
+    //         for (int i=0;i<_d->stxs.size();i++){
+    //             if (!(dynamic_cast<List*>(_d->stxs[i].get()))) throw RuntimeError("Illegal Let Definition(inside).");
+    //             List* _t=dynamic_cast<List*>(_d->stxs[i].get());
+    //             if (_t->stxs.size()!=2) throw RuntimeError("Illegal Let Definition(syntax).");
+    //             Expr _ee=_t->stxs[1].get()->parse(env);
+    //             if (!dynamic_cast<Identifier*>(_t->stxs[0].get())) throw RuntimeError("Illegal Let definition(name)");
+    //             _v.push_back(std::make_pair(dynamic_cast<Identifier*>(_t->stxs[0].get())->s,_ee));
+    //         }
+    //         return Expr(new Let(_v,stxs[2].get()->parse(env)));
+    //     }
+    //     else if (pt->s=="lambda"){
+    //         if (stxs.size()!=3) throw RuntimeError("Illegal Lambda Size.");
+    //         if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal lambda");
+    //         List* _d=dynamic_cast<List*>(stxs[1].get());
+    //         std::vector<std::string> _v{};
+    //         for (int i=0;i<_d->stxs.size();i++){
+    //             if (!dynamic_cast<Identifier*>(_d->stxs[i].get())) throw RuntimeError("Illegal lambda");
+    //             Identifier* _i=dynamic_cast<Identifier*>(_d->stxs[i].get());
+    //             _v.push_back(_i->s);
+    //         }
+    //         return Expr(new Lambda(_v,stxs[2].get()->parse(env)));
+    //     }
+    //     else if (pt->s=="letrec"){
+    //         if (stxs.size()!=3) throw RuntimeError("Illegal Letrec Size.");
+    //         if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal Letrec Definition(outside).");
+    //         List* _d=dynamic_cast<List*>(stxs[1].get());
+    //         std::vector<std::pair<std::string, Expr>> _v{};
+    //         //The variable assignments
+    //         for (int i=0;i<_d->stxs.size();i++){
+    //             if (!(dynamic_cast<List*>(_d->stxs[i].get()))) throw RuntimeError("Illegal Letrec Definition(inside).");
+    //             List* _t=dynamic_cast<List*>(_d->stxs[i].get());
+    //             if (_t->stxs.size()!=2) throw RuntimeError("Illegal Letrec Definition(syntax).");
+    //             Expr _ee=_t->stxs[1].get()->parse(env);
+    //             if (!dynamic_cast<Identifier*>(_t->stxs[0].get())) throw RuntimeError("Illegal Letrec definition(name)");
+    //             _v.push_back(std::make_pair(dynamic_cast<Identifier*>(_t->stxs[0].get())->s,_ee));
+    //         }
+    //         return Expr(new Letrec(_v,stxs[2].get()->parse(env)));
+    //     }
+    //     else{
+    //         vector<Expr> _t{};
+    //         for (int i=1;i<stxs.size();i++){
+    //             _t.push_back(stxs[i]->parse(env));
+    //         }
+    //         return Expr(new Apply(stxs[0]->parse(env),_t));
+    //     }
+    // }
+    // else{
+    //     vector<Expr> _t{};
+    //     for (int i=1;i<stxs.size();i++){
+    //         _t.push_back(stxs[i]->parse(env));
+    //     }
+    //     return Expr(new Apply(stxs[0]->parse(env),_t));
+    // }
 }
 
 #endif

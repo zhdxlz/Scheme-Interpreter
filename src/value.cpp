@@ -1,4 +1,5 @@
 #include "value.hpp"
+#include "RE.hpp"
 
 AssocList::AssocList(const std::string &x, const Value &v, Assoc &next)
   : x(x), v(v), next(next) {}
@@ -91,6 +92,10 @@ void Primi::show(std::ostream &os){
   os<<"#<procedure>";
 }
 
+void Reser::show(std::ostream &os){
+  throw RuntimeError("Invalid Syntax.(Output a Reserved_word)");
+}
+
 ValueBase :: ValueBase(ValueType vt) : v_type(vt) {}
 
 Value :: Value(ValueBase *ptr) : ptr(ptr) {}
@@ -142,4 +147,9 @@ Value ClosureV(const std::vector<std::string> &xs, const Expr &e, const Assoc &e
 Primi::Primi(const ExprType &_e):ValueBase(V_PRIMITIVE),_e(_e){}
 Value PrimiV(const ExprType &_e){
   return Value(new Primi(_e));
+}
+
+Reser::Reser(const ExprType &_e):ValueBase(V_RESERVED),_e(_e){}
+Value ReserV(const ExprType &_e){
+  return Value(new Reser(_e));
 }

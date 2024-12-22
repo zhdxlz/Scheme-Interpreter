@@ -17,7 +17,7 @@ Let :: Let(const vector<pair<string, Expr>> &vec, const Expr &e) : ExprBase(E_LE
 
 Lambda :: Lambda(const vector<string> &vec, const Expr &expr) : ExprBase(E_LAMBDA), x(vec), e(expr) {}
 
-Apply :: Apply(const Expr &expr, const vector<Expr> &vec) : ExprBase(E_APPLY), rator(expr), rand(vec) {}
+Apply :: Apply(const Expr &expr, const vector<Expr> &vec,const std::vector<Syntax> &synt) : ExprBase(E_APPLY), rator(expr), rand(vec),syn(synt) {}
 
 Letrec :: Letrec(const vector<pair<string, Expr>> &vec, const Expr &expr) : ExprBase(E_LETREC), bind(vec), body(expr) {}
 
@@ -80,3 +80,5 @@ Not :: Not(const Expr &r1) : Unary(E_NOT, r1) {}
 Car :: Car(const Expr &r1) : Unary(E_CAR, r1) {}
 
 Cdr :: Cdr(const Expr &r1) : Unary(E_CDR, r1) {}
+
+Empt::Empt():ExprBase(E_EMPT){};

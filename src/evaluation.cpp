@@ -34,7 +34,7 @@ Value Apply::eval(Assoc &e) {
         }
         return _c->e->eval(_e);
     }
-    //Then consider the default primitives(Reserved_word c)
+    //Then consider the default primitives
     if (dynamic_cast<Primi*>(_v.get())){
         Primi* _p=dynamic_cast<Primi*>(_v.get());
 
@@ -119,6 +119,69 @@ Value Apply::eval(Assoc &e) {
             return Expr(new Cdr(rand[0]))->eval(e);
         }
     }
+    //Then consider the Reserved_words
+    else if (dynamic_cast<Reser*>(_v.get())){
+        Reser* _p=dynamic_cast<Reser*>(_v.get());
+        if (_p->_e==E_BEGIN){
+            std::vector<Expr> _t{};
+            for (int i=1;i<rand.size();i++){
+                _t.push_back(rand[i]);
+            }
+            return Expr(new Begin(_t))->eval(e);
+        }
+        else if (_p->_e==E_QUOTE){//oops?
+            if (rand.size()!=1) throw RuntimeError("Illegal quote.");
+            return Expr(new Quote(syn[0]))->eval(e);
+        }
+        else if (_p->_e==E_IF){
+            if (rand.size()!=3) throw RuntimeError("Illegal if comparison");
+            return Expr(new If(rand[0],rand[1],rand[2]))->eval(e);
+        }
+        else if (_p->_e==E_LET){
+            if (rand.size()!=2) throw RuntimeError("Illegal Let Size.");
+            if (!dynamic_cast<List*>(syn[0].get())) throw RuntimeError("Illegal Let Definition(outside).");
+            List* _d=dynamic_cast<List*>(syn[0].get());
+            std::vector<std::pair<std::string, Expr>> _v{};
+            //The variable assignments
+            for (int i=0;i<_d->stxs.size();i++){
+                if (!(dynamic_cast<List*>(_d->stxs[i].get()))) throw RuntimeError("Illegal Let Definition(inside).");
+                List* _t=dynamic_cast<List*>(_d->stxs[i].get());
+                if (_t->stxs.size()!=2) throw RuntimeError("Illegal Let Definition(syntax).");
+                Expr _ee=_t->stxs[1].get()->parse(e);
+                if (!dynamic_cast<Identifier*>(_t->stxs[0].get())) throw RuntimeError("Illegal Let definition(name)");
+                _v.push_back(std::make_pair(dynamic_cast<Identifier*>(_t->stxs[0].get())->s,_ee));
+            }
+            return Expr(new Let(_v,rand[1]))->eval(e);
+        }
+        else if (_p->_e==E_LAMBDA){
+            if (rand.size()!=2) throw RuntimeError("Illegal Lambda Size.");
+            if (!dynamic_cast<List*>(syn[0].get())) throw RuntimeError("Illegal lambda");
+            List* _d=dynamic_cast<List*>(syn[0].get());
+            std::vector<std::string> _v{};
+            for (int i=0;i<_d->stxs.size();i++){
+                if (!dynamic_cast<Identifier*>(_d->stxs[i].get())) throw RuntimeError("Illegal lambda");
+                Identifier* _i=dynamic_cast<Identifier*>(_d->stxs[i].get());
+                _v.push_back(_i->s);
+            }
+            return Expr(new Lambda(_v,rand[1]))->eval(e);
+        }
+        else if (_p->_e==E_LETREC){
+            if (rand.size()!=2) throw RuntimeError("Illegal Letrec Size.");
+            if (!dynamic_cast<List*>(syn[0].get())) throw RuntimeError("Illegal Letrec Definition(outside).");
+            List* _d=dynamic_cast<List*>(syn[0].get());
+            std::vector<std::pair<std::string, Expr>> _v{};
+            //The variable assignments
+            for (int i=0;i<_d->stxs.size();i++){
+                if (!(dynamic_cast<List*>(_d->stxs[i].get()))) throw RuntimeError("Illegal Letrec Definition(inside).");
+                List* _t=dynamic_cast<List*>(_d->stxs[i].get());
+                if (_t->stxs.size()!=2) throw RuntimeError("Illegal Letrec Definition(syntax).");
+                Expr _ee=_t->stxs[1].get()->parse(e);
+                if (!dynamic_cast<Identifier*>(_t->stxs[0].get())) throw RuntimeError("Illegal Letrec definition(name)");
+                _v.push_back(std::make_pair(dynamic_cast<Identifier*>(_t->stxs[0].get())->s,_ee));
+            }
+            return Expr(new Letrec(_v,rand[1]))->eval(e);
+        }
+    }
     throw RuntimeError("Illegal Apply.");
 } // for function calling
 
@@ -138,14 +201,19 @@ Value Letrec::eval(Assoc &env) {
 } // letrec expression
 
 Value Var::eval(Assoc &e) {
-    //Find in assoc list
+    //Shadow: First Find in assoc list
     Value _v=find(x,e);
     if (_v.get()!=nullptr){
         return _v;
     }
-    auto _pr=primitives.find(x);
+    //Then find in defualt list
+    auto _pr=primitives.find(x);//For Primitives
     if (_pr!=primitives.end()){
         return PrimiV(_pr->second);
+    }
+    auto _re=reserved_words.find(x);//For Reserved_words
+    if (_re!=reserved_words.end()){
+        return ReserV(_re->second);
     }
     throw RuntimeError("Undefined variable. ("+x+")");
 } // evaluation of variable
@@ -407,3 +475,7 @@ Value Cdr::evalRator(const Value &rand) {
     Pair* _e=dynamic_cast<Pair*>(rand.get());
     return _e->cdr;
 } // cdr
+
+Value Empt::eval(Assoc &e){
+    return NullV();
+}
