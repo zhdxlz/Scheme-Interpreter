@@ -97,9 +97,11 @@ Value Apply::eval(Assoc &e) {
         }
         //----Exit----
         else if (_p->_e==E_EXIT){
+            if (rand.size()!=0) throw RuntimeError("Illegal ""exit"" operation.");
             return Expr(new Exit())->eval(e);
         }
         else if (_p->_e==E_VOID){
+            if (rand.size()!=0) throw RuntimeError("Illegal ""void"" operation.");
             return Expr(new MakeVoid())->eval(e);
         }
         else if (_p->_e==E_CONS){
