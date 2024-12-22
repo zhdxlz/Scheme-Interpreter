@@ -124,7 +124,7 @@ Value Apply::eval(Assoc &e) {
         Reser* _p=dynamic_cast<Reser*>(_v.get());
         if (_p->_e==E_BEGIN){
             std::vector<Expr> _t{};
-            for (int i=1;i<rand.size();i++){
+            for (int i=0;i<rand.size();i++){
                 _t.push_back(rand[i]);
             }
             return Expr(new Begin(_t))->eval(e);
