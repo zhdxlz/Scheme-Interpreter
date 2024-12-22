@@ -207,15 +207,13 @@ Value Quote::eval(Assoc &e) {//oops
         //Length 1 (Guaranteed not ".")
         else if (_s==1){
             if (dynamic_cast<Identifier*>(_t->stxs[0].get())&&dynamic_cast<Identifier*>(_t->stxs[0].get())->s==".") throw RuntimeError("Invalid Syntax List.(len=1 identi=.)");
-            return Expr(new Quote(_t->stxs[0]))->eval(e);
+            //return Expr(new Quote(_t->stxs[0]))->eval(e);
+            return PairV(Expr(new Quote(_t->stxs[0]))->eval(e),NullV());
         }
         //Start with "." Ignore it (Guaranteed _s=2 and there must be 1 syntax after it)
         else if (dynamic_cast<Identifier*>(_t->stxs[0].get())&&dynamic_cast<Identifier*>(_t->stxs[0].get())->s=="."){
             if (_s!=2) throw RuntimeError("Invalid Syntax List.(len!=2 identi=.)");
-            std::vector<Syntax> _s(_t->stxs.begin()+1,_t->stxs.end());
-            List* _l=new List();
-            _l->stxs=_s;
-            return Expr(new Quote(_l))->eval(e);
+            return Expr(new Quote(_t->stxs[1]))->eval(e);
         }
         //_s=2 and no "."(Guaranteed by the above if judgement)
         else if (_s==2){
