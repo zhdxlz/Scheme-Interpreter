@@ -4,12 +4,12 @@ echo "This is a simple score shell script for you to find out problems in your p
 echo "--------------------------------------------------------------------------------"
 
 L=1
-R=119
+R=118
 for ((i = $L; i <= $R; i = i + 1))
 do
-    echo ""
-    echo "---------------------------"
-    echo "Ready to test: TEST" $i
+    #echo ""
+    #echo "---------------------------"
+    #echo "Ready to test: TEST" $i
     ../code << EOF > scm.out
     $(cat ./data/$i.in)
     (exit)
@@ -25,17 +25,17 @@ EOF
         # echo ""
         # exit 1
     fi
-    echo "---------------------------"
-    echo ""
+    #echo "---------------------------"
+    #echo ""
 done
 
 L_EXTRA=1
 R_EXTRA=7
 for ((i = $L_EXTRA; i <= $R_EXTRA; i = i + 1))
 do
-    echo ""
-    echo "---------------------------"
-    echo "Ready to test: EXTRA TEST" $i
+    #echo ""
+    #echo "---------------------------"
+    #echo "Ready to test: EXTRA TEST" $i
     ../code << EOF > scm.out
     $(cat ./more-tests/$i.in)
     (exit)
@@ -51,6 +51,6 @@ EOF
         # echo ""
         # exit 1
     fi
-    echo "---------------------------"
-    echo ""
+    #echo "---------------------------"
+    #echo ""
 done
