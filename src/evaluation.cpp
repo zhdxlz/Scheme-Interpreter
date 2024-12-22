@@ -243,7 +243,8 @@ Value False::eval(Assoc &e) {
 } // evaluation of #f
 
 Value Begin::eval(Assoc &e) {
-    if (es.size()==0) return NullV();
+    if (es.size()==0) 
+        throw RuntimeError("Illegal Begin(Insufficient expr)");
     for (int i=0;i<es.size()-1;i++){
         es[i].get()->eval(e);
     }
