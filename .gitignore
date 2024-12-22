@@ -8,3 +8,5 @@ score/*.out
 .vscode
 
 test.cpp
+
+attention.inf

@@ -84,7 +84,7 @@ Expr List :: parse(Assoc &env) {
             return Expr(new Let(_v,stxs[2].get()->parse(env)));
         }
         else if (pt->s=="lambda"){
-            if (stxs.size()!=3) throw RuntimeError("Illegal Letrec Size.");
+            if (stxs.size()!=3) throw RuntimeError("Illegal Lambda Size.");
             if (!dynamic_cast<List*>(stxs[1].get())) throw RuntimeError("Illegal lambda");
             List* _d=dynamic_cast<List*>(stxs[1].get());
             std::vector<std::string> _v{};

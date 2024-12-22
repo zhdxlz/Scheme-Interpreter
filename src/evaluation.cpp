@@ -77,7 +77,7 @@ Value Apply::eval(Assoc &e) {
             if (rand.size()!=1) throw RuntimeError("Illegal ""Not"" operation.");
             return Expr(new Not(rand[0]))->eval(e);
         }
-        else if (_p->_e==E_INTQ||_p->_e==E_BOOLQ||_p->_e==E_NULLQ||_p->_e==E_PAIRQ||_p->_e==E_SYMBOLQ){
+        else if (_p->_e==E_INTQ||_p->_e==E_BOOLQ||_p->_e==E_NULLQ||_p->_e==E_PAIRQ||_p->_e==E_SYMBOLQ||_p->_e==E_PROCQ){
             if (rand.size()!=1) throw RuntimeError("Illegal type judge.");
             if (_p->_e==E_INTQ)
                 return Expr(new IsFixnum(rand[0]))->eval(e);
@@ -89,6 +89,8 @@ Value Apply::eval(Assoc &e) {
                 return Expr(new IsPair(rand[0]))->eval(e);
             else if (_p->_e==E_SYMBOLQ)
                 return Expr(new IsSymbol(rand[0]))->eval(e);
+            else if (_p->_e==E_PROCQ)
+                return Expr(new IsProcedure(rand[0]))->eval(e);
 
         }
         else if (_p->_e==E_EQQ){
@@ -226,6 +228,9 @@ Value Quote::eval(Assoc &e) {//oops
             _l->stxs=_s;
             return PairV(Expr(new Quote(_t->stxs[0]))->eval(e),Expr(new Quote(Syntax(_l)))->eval(e));
         }
+    }
+    else{
+        throw RuntimeError("Illegal Quote type.");
     }
 } // quote expression
 
@@ -377,7 +382,11 @@ Value IsPair::evalRator(const Value &rand) {
 } // pair?
 
 Value IsProcedure::evalRator(const Value &rand) {
-    return BooleanV((dynamic_cast<Closure*>(rand.get()))!=nullptr);
+    return BooleanV(
+        (dynamic_cast<Closure*>(rand.get()))!=nullptr
+        ||
+        (dynamic_cast<Primi*>(rand.get()))!=nullptr
+    );
 } // procedure?
 
 Value Not::evalRator(const Value &rand) {
