@@ -199,31 +199,24 @@ Value Quote::eval(Assoc &e) {//oops
         //Empty list
         if (_s==0){
             return NullV();
-            //return PairV(NullV(),NullV());
         }
-        //Start with "." Ignore it
-        else if (dynamic_cast<Identifier*>(_t->stxs[0].get())&&dynamic_cast<Identifier*>(_t->stxs[0].get())->s=="."){
-            // if (_s!=2){
-                std::vector<Syntax> _s(_t->stxs.begin()+1,_t->stxs.end());
-                List* _l=new List();
-                _l->stxs=_s;
-                return Expr(new Quote(_l))->eval(e);
-            // }
-            // else if (_s==2){
-            //     return PairV(Expr(new Quote(_t->stxs[0]))->eval(e),NullV());
-            // }
-        }
-        //Length 1 and not "."
+        //Length 1 (Guaranteed not ".")
         else if (_s==1){
-            //return PairV(Expr(new Quote(_t->stxs[0]))->eval(e),NullV());
+            if (dynamic_cast<Identifier*>(_t->stxs[0].get())&&dynamic_cast<Identifier*>(_t->stxs[0].get())->s==".") throw RuntimeError("Invalid Syntax List.(len=1 identi=.)");
             return Expr(new Quote(_t->stxs[0]))->eval(e);
         }
-        //else if (_s==2){//We have checked whether the 1st Syntax in the above if-judgement.
-        //Suppose the "." can only appear at the 2nd lst elements.(otherwise troublesome)
-            //If the 2nd lst is "."
-            //return PairV(PairV(Expr(new Quote(_t->stxs[0]))->eval(e),Expr(new Quote(_t->stxs[1]))->eval(e)),NullV());
-            //If the 2nd lst is a common Syntax
-        //}
+        //Start with "." Ignore it (Guaranteed _s=2 and there must be 1 syntax after it)
+        else if (dynamic_cast<Identifier*>(_t->stxs[0].get())&&dynamic_cast<Identifier*>(_t->stxs[0].get())->s=="."){
+            if (_s!=2) throw RuntimeError("Invalid Syntax List.(len!=2 identi=.)");
+            std::vector<Syntax> _s(_t->stxs.begin()+1,_t->stxs.end());
+            List* _l=new List();
+            _l->stxs=_s;
+            return Expr(new Quote(_l))->eval(e);
+        }
+        //_s=2 and no "."(Guaranteed by the above if judgement)
+        else if (_s==2){
+            return PairV(Expr(new Quote(_t->stxs[0]))->eval(e),PairV((Expr(new Quote(_t->stxs[1]))->eval(e)),NullV()));
+        }
         //Length >2 need recursive construction
         else{
             std::vector<Syntax> _s(_t->stxs.begin()+1,_t->stxs.end());
@@ -231,7 +224,6 @@ Value Quote::eval(Assoc &e) {//oops
             _l->stxs=_s;
             return PairV(Expr(new Quote(_t->stxs[0]))->eval(e),Expr(new Quote(Syntax(_l)))->eval(e));
         }
-        
     }
 } // quote expression
 
