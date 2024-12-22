@@ -87,6 +87,10 @@ void Closure::show(std::ostream &os) {
   os << "#<procedure>";
 }
 
+void Primi::show(std::ostream &os){
+  os<<"#<procedure>";
+}
+
 ValueBase :: ValueBase(ValueType vt) : v_type(vt) {}
 
 Value :: Value(ValueBase *ptr) : ptr(ptr) {}
@@ -133,4 +137,9 @@ Closure::Closure(const std::vector<std::string> &xs, const Expr &e, const Assoc 
   : ValueBase(V_PROC), parameters(xs), e(e), env(env) {}
 Value ClosureV(const std::vector<std::string> &xs, const Expr &e, const Assoc &env) {
   return Value(new Closure(xs, e, env));
+}
+
+Primi::Primi(const ExprType &_e):ValueBase(V_PRIMITIVE),_e(_e){}
+Value PrimiV(const ExprType &_e){
+  return Value(new Primi(_e));
 }

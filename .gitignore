@@ -6,3 +6,5 @@ score/*.txt
 score/*.out
 
 .vscode
+
+test.cpp

@@ -24,7 +24,7 @@ void REPL()
         Syntax stx = readSyntax(std :: cin); // read
         try
         {
-            stx->show(std::cout);
+            //stx->show(std::cout);
             //std::cout<<std::endl;
             //pause();
             Expr expr = stx -> parse(global_env); // parse

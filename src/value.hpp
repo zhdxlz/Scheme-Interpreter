@@ -106,6 +106,14 @@ struct String : ValueBase
 };
 Value StringV(const std :: string &);
 
+struct Primi : ValueBase
+{
+    ExprType _e;
+    Primi(const ExprType&);
+    virtual void show(std::ostream &) override;
+};
+Value PrimiV(const ExprType &);
+
 std::ostream &operator<<(std::ostream &, Value &);
 
 Assoc empty();
